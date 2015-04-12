@@ -1,7 +1,7 @@
 Setup
 ================================
 
-1. git clone git@bitbucket.org:****.git && cd $_
+1. git clone https://github.com/manamibhunia/edesia.git && cd $_
 2. npm install
 3. gulp (optional)
 4. node app.js
