@@ -1,6 +1,8 @@
-$(document).ready(function(){
-  //Handles menu drop down
-  $('.dropdown-menu').find('form').click(function (e) {
-    e.stopPropagation();
-  });
-});
+var $ = jQuery = require('jquery');
+var bootstrap = require('bootstrap');
+var header = require('./header.js');
+
+var mySingleton = (function () {
+
+  header();
+})();

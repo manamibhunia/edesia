@@ -9,8 +9,12 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     prefix = require('gulp-autoprefixer'),
     minifyCSS = require('gulp-minify-css'),
-    clean = require('gulp-clean');
+    clean = require('gulp-clean'),
+    hbsfy = require('hbsfy');
 
+hbsfy.configure({
+  extensions: ['hbs']
+});
 
 gulp.task('lint-client', function() {
     return gulp.src('./src/**/*.js')
@@ -41,7 +45,9 @@ gulp.task('browserify', ['lint-client', 'clean-scripts'], function() {
     gulp.src('src/js/main.js')
         .pipe(sourcemaps.init())
         .pipe(concat('main.js'))
-        .pipe(browserify())
+        .pipe(browserify({
+          transform: [hbsfy]
+        }))
         .pipe(uglify({
             compress: {
                 negate_iife: false
