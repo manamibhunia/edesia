@@ -53,7 +53,6 @@
     "method-override": "^2.3.2",
     "mtwitter": "^1.6.4",
     "path": "^0.11.14",
-    "util": "^0.10.3",
-    "browserify-handlebars": "~1.0.0"
+    "util": "^0.10.3"
   }
 }

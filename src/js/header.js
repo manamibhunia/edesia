@@ -1,6 +1,5 @@
 var $ = jQuery = require('jquery');
 var bootstrap = require('bootstrap');
-var hbr = require('browserify-handlebars');
 var coreTemplates = require('../templates/headerNavTmpl.hbs');
 
 var HeaderView = function() {
