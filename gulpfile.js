@@ -13,7 +13,7 @@ var gulp = require('gulp'),
     hbsfy = require('hbsfy');
 
 hbsfy.configure({
-  extensions: ['hbs']
+    extensions: ['hbs']
 });
 
 gulp.task('lint-client', function() {
@@ -46,7 +46,7 @@ gulp.task('browserify', ['lint-client', 'clean-scripts'], function() {
         .pipe(sourcemaps.init())
         .pipe(concat('main.js'))
         .pipe(browserify({
-          transform: [hbsfy]
+            transform: [hbsfy]
         }))
         .pipe(uglify({
             compress: {
@@ -87,7 +87,13 @@ gulp.task('copy-images', function() {
         .pipe(gulp.dest('dist/images/'));
 });
 
-gulp.task('build', ['browserify', 'minify', 'icons', 'copy-html', 'copy-images']);
+gulp.task('copy-css', function() {
+    gulp.src(['node_modules/bootstrap/dist/css/bootstrap.min.css', 
+        'node_modules/font-awesome/css/font-awesome.min.css'])
+        .pipe(gulp.dest('dist/styles/'));
+});
+
+gulp.task('build', ['browserify', 'minify', 'icons', 'copy-html', 'copy-images', 'copy-css']);
 
 
 gulp.task('watch', ['build'], function() {

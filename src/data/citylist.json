@@ -1,0 +1,91 @@
+[{
+    "cityName": "San Francisco",
+    "image": "san_francosco_background.jpg",
+    "areas": [
+        "Bernal Heights",
+        "The Castro",
+        "Downtown",
+        "Financial District",
+        "Glen Park",
+        "Haight-Ashbury",
+        "Mission",
+
+        "Nob Hill",
+        "Noe Valley",
+        "Potrero Hill",
+        "Russian Hill",
+        "SoMa",
+        "Twin Peaks",
+        "Western Addition"
+    ]
+}, {
+    "cityName": "San Jose",
+    "image": "san_jose_background.jpg",
+    "areas": [
+        "Berryessa",
+        "Blossom Hill",
+        "Campbell",
+        "Evergreen",
+        "Los Gatos",
+        "Milpitas",
+        "San Jose (Downtown)",
+        "San Jose (West)",
+        "Santa Clara",
+        "Willow Glen"
+    ]
+}, {
+    "cityName": "Silicon Valley",
+    "image": "silicon_valley_background.jpg",
+    "areas": [
+        "Atherton",
+        "Belmont",
+        "Burlingame",
+        "Cupertino",
+        "Foster City",
+        "Hillsborough",
+        "Los Altos",
+
+        "Menlo Park",
+        "Mountain View",
+        "Palo Alto",
+        "Redwood City",
+        "Redwood Shores",
+        "San Carlos"
+    ]
+}, {
+    "cityName": "Los Angeles",
+    "image": "los_angeles_background.jpg",
+    "areas": [
+
+        "Beverly Hills",
+        "Brentwood",
+        "Century City",
+        "Culver City",
+        "Echo Park",
+        "El Segundo",
+        "Hermosa Beach",
+        "Los Feliz",
+        "Marina del Rey",
+        "Manhattan Beach",
+        "Pacific Palisades",
+        "Santa Monica",
+        "Silver Lake"
+
+    ]
+}, {
+    "cityName": "New York",
+    "image": "new_york_background.jpg",
+    "areas": [
+        "Brooklyn Heights",
+        "Carroll Gardens",
+        "Clinton Hill",
+        "Cobble Hill",
+        "Downtown",
+        "DUMBO",
+        "Fort Greene",
+        "Greenpoint",
+        "Park Slope",
+        "Prospect Heights",
+        "Williamsburg"
+    ]
+}]

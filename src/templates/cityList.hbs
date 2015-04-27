@@ -1,0 +1,25 @@
+<div class = "row">
+  <div class="container">
+    {{#each cityArray}}
+    <div class="col-xs-6">
+      <div class="city-card">
+        <div class="city-card-panel title-panel">
+          <div class="panel-mask">
+            <img src="images/{{this.image}}">
+          </div>
+          <p class="city-card-title">{{this.cityName}}</p>
+        </div>
+        <div class="city-card-panel cities-panel">
+          <div class="row city-list">
+            <ul class="city-card-cities">
+              {{#each this.areas}}
+              <li><a href="city/{{../this.cityName}}/area/{{this}}">{{this}}</a></li>
+              {{/each}}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+</div>

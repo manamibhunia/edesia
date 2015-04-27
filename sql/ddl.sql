@@ -29,13 +29,13 @@ CREATE TABLE customer(
   security_answer VARCHAR(100)
 ) ENGINE=INNODB;
 
-DROP TABLE IF EXISTS cusine;
-CREATE TABLE cusine (
-  cusine_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  cusine_name VARCHAR(100),
-  cusine_type VARCHAR(30),
+DROP TABLE IF EXISTS cuisine;
+CREATE TABLE cuisine (
+  cuisine_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  cuisine_name VARCHAR(100),
+  cuisine_type VARCHAR(30),
   ingredients VARCHAR(200),
-  note VARCHAR(500)
+  cuisine_occasion VARCHAR(500)
 ) ENGINE=INNODB;
 
 DROP TABLE IF EXISTS orders;
@@ -56,9 +56,9 @@ CREATE TABLE orders (
 DROP TABLE IF EXISTS order_details;
 CREATE TABLE order_details (
   order_id_fk BIGINT UNSIGNED NOT NULL,
-  cusine_id_fk	BIGINT UNSIGNED NOT NULL,
+  cuisine_id_fk	BIGINT UNSIGNED NOT NULL,
   quantity BIGINT UNSIGNED,
   price BIGINT UNSIGNED,
   FOREIGN KEY (order_id_fk) REFERENCES orders(order_id) ON DELETE CASCADE,
-  FOREIGN KEY (cusine_id_fk) REFERENCES cusine(cusine_id) ON DELETE CASCADE
+  FOREIGN KEY (cuisine_id_fk) REFERENCES cuisine(cuisine_id) ON DELETE CASCADE
 ) ENGINE=INNODB;

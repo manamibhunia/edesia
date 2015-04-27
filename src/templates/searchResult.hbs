@@ -1,0 +1,46 @@
+<div id="searchResults">
+        {{# each searchArray}}
+        <div class="col-md-6">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">
+                    {{this.caterer_name}}
+                    <i class="fa fa-times fa-lg pointer pull-right"></i>
+                </h3>
+              </div>
+              <div class="panel-body">
+                <ul>
+                    <li>Type: {{this.caterer_type}}</li>
+                    <li>Address: {{this.address1}}, {{this.address2}}</li>
+                    <li>City: {{this.city}}</li>
+                    <li>Zip: {{this.zip}}</li>
+                    <li>Email: {{this.email}}</li>
+                    <li>Phone: {{this.phone}}</li>
+                </ul>
+                <div class="btn-group">
+               <select type="button" id ="occasion"class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Occasions<span class="caret"></span>
+                
+                    <option id ="Occasion">Breakfast</option>
+                    <option id="lunch">Lunch</option>
+                    <li><a href="dinner">Dinner</a></li>
+                  
+              </select>
+                </div>
+                <div class="btn-group">
+               <select type="button" id ="menu" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="caret"></span>
+                <ul class="dropdown-menu" role="menu">
+                    <option id ="apetizer">Menu</option>
+                    <option id ="apetizer">Apetizer</option>
+                    <li><a href="#">Soup</a></li>
+                    <li><a href="#">Main Course</a></li>
+                    <li><a href="#">Desserts</a></li>
+                    <li><a href="#">Beverages</a></li>
+                  </ul>
+              </select>
+                </div>
+              </div>
+            </div>
+        </div>
+        {{/each}}
+</div>
+
