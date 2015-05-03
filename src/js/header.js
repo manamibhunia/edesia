@@ -4,7 +4,7 @@ var headerMainTemplate = require('../templates/headerNavTmpl.hbs');
 var guestUserTemplate = require('../templates/guestUser.hbs');
 var loggedInUserTemplate = require('../templates/loggedInUser.hbs');
 var searchResultTemplate = require('../templates/searchResult.hbs');
-var occasionResultTemplate = require('../templates/occasionResultDetails.hbs');
+var menuTemplate = require('../templates/menu.hbs');
 var cityListTemplate = require('../templates/cityList.hbs');
 
 var cityList = require('../data/citylist.json');
@@ -12,11 +12,12 @@ var cityList = require('../data/citylist.json');
 var HeaderView = function() {
 
     $('header').html(headerMainTemplate());
+
     if (localStorage.getItem("user")) {
         sessionStorage.setItem("user", JSON.stringify(userObj));
-    } 
+    }
 
-    if(sessionStorage.getItem("user")) {
+    if (sessionStorage.getItem("user")) {
         var userObj = JSON.parse(sessionStorage.getItem("user"));
         $('#user-menu').html(loggedInUserTemplate({
             "userName": userObj.customer_first_name
@@ -25,7 +26,33 @@ var HeaderView = function() {
         $('#user-menu').html(guestUserTemplate());
     }
 
-    $('#main').html(cityListTemplate({"cityArray": cityList}));
+    $('#main').html(cityListTemplate({
+        "cityArray": cityList
+    }));
+
+    $('.area-link').click(function(event) {
+
+        event.preventDefault();
+        var city = $(event.target).attr('data-city');
+        var area = $(event.target).attr('data-area');
+        var url = '/api/city/' + city + '/area/' + area;
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response, textStatus, jqXHR) {
+                if (response) {
+                    console.log('Caterer List -', response);
+                    showSearchResult(response);
+                } else {
+                    console.log('No such caterer found');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Search failed- ', errorThrown);
+            }
+        });
+    });
+
 
     $('.dropdown-menu').find('.form-div').click(function(event) {
         event.stopPropagation();
@@ -66,7 +93,6 @@ var HeaderView = function() {
 
             email: $('#login-email').val(),
             password: $('#login-password').val(),
-
         };
 
         $.ajax({
@@ -85,7 +111,7 @@ var HeaderView = function() {
                 if (data) {
                     console.log('user logged in successfully-', data);
                     sessionStorage.setItem("user", JSON.stringify(data));
-                    if($('#remember-me').is(':checked')) {
+                    if ($('#remember-me').is(':checked')) {
                         console.log('remember me');
                         localStorage.setItem("user", JSON.stringify(data));
                     }
@@ -103,33 +129,34 @@ var HeaderView = function() {
 
     });
 
-    $('.logout-btn').click(function() {
+    $('.logout-btn').click(function(event) {
 
         if (localStorage.getItem("user")) {
             localStorage.removeItem("user");
         }
-        if(sessionStorage.getItem("user")) {
+        if (sessionStorage.getItem("user")) {
             sessionStorage.removeItem("user");
         }
         $('#user-menu').html(guestUserTemplate());
     });
 
-    $('#search').click(function() {
+    $('#search').click(function(event) {
 
+        var self = this;
+        console.log('this- ',this);
         var requestJson = {
 
             item: $('#search-item').val(),
-
         };
         $.ajax({
             url: '/api/caterer',
             type: 'GET',
             data: requestJson,
-            success: function(data, textStatus, jqXHR) {
-                if (data) {
-                    console.log('Caterer List -', data);
+            success: function(response, textStatus, jqXHR) {
+                if (response) {
+                    console.log('Caterer List -', response);
+                    showSearchResult(response);
 
-                    $('#main').html(searchResultTemplate({"searchArray": data}));
                 } else {
                     console.log('No such caterer found');
                 }
@@ -138,32 +165,47 @@ var HeaderView = function() {
                 console.log('Search failed- ', errorThrown);
             }
         });
-
     });
 
+    var showSearchResult = function(searchResult) {
 
-    $('#breakfast').click(function() {
+        $('#main').html(searchResultTemplate({
+            "searchArray": searchResult
+        }));
+        $(".occasion-dpd").change(function(event) {
 
-        var requestJson = {
+            var self = this;
+            var catererId = $(event.target).attr('data-caterer-id');
+            var servingTime = $(this).find('option:selected').val();
+            var url = '/api/caterer/menuByTime/' + servingTime + '/' + catererId;
+            console.log("menuByTime url- ", url);
+            fetchMenuList(url);
+        });
+        $(".menu-dpd").change(function(event) {
 
-        item: $('#breakfast').val($(this).find(":selected").text()),
-
-        };
-        $.ajax({
-            url: '/api/caterer/occasion/breakfast',
-            type: 'GET',
-            data: requestJson,
-            success: function(data, textStatus, jqXHR) {
-                console.log('BREAKFAST LIST- ', data);
-                $('#main').html(occasionResultTemplate({"searchArray": data}));
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.log(' failed- ', errorThrown);
-            }
+            var catererId = $(event.target).attr('data-caterer-id');
+            var category = $(this).find('option:selected').val();
+            var url = '/api/caterer/menuByCategory/' + category + '/' + catererId;
+            fetchMenuList(url);
         });
 
-    });
+        var fetchMenuList = function(url) {
 
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(menuResponse, textStatus, jqXHR) {
+                    console.log('Cuisine LIST- ', menuResponse);
+                    $('#main').html(menuTemplate({
+                        "menuArray": menuResponse
+                    }));
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(' failed- ', errorThrown);
+                }
+            });
+        };
+    };
 };
 
 module.exports = HeaderView;

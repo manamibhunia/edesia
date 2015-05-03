@@ -69,23 +69,26 @@ module.exports = (function() {
         });
     });
 
-    //var caterer = api.route('/caterer');
+    var catererCity = api.route('/city/:city/area/:area');
 
-    //caterer.get(function(req, res) {
+    catererCity.get(function(req, res) {
 
-    //pool.getConnection(function(err, connection) {
-    // connection.query('SELECT * FROM caterer', function(err, rows) {
+        var city = req.param('city');
+        var area = req.param('area');
+        var queryString = 'SELECT * FROM caterer WHERE city="'+city+'" AND area ="'+area+'"';
+        pool.getConnection(function(err, connection) {
+            connection.query(queryString, function(err, rows) {
 
-    // if (err) {
-    //console.log(err);
-    //   if (err) return err;
-    //}
-    //console.log('Caterer List: ', rows);
-    //connection.release();
-    // res.send(rows);
-    // });
-    //  });
-    //});
+                if (err) {
+                    console.log(err);
+                    if (err) return err;
+                }
+                console.log('Cuisine List: ', rows);
+                connection.release();
+                res.send(rows);
+            });
+        });
+    });
 
     var caterer = api.route('/caterer');
 
@@ -95,7 +98,7 @@ module.exports = (function() {
         var query = '';
         if (isNaN(item)) {
 
-            query = 'SELECT * FROM caterer WHERE city="' + item + '" OR caterer_type ="' + item + '"';
+            query = 'SELECT * FROM caterer WHERE city="' + item + '" OR cuisine_type ="' + item + '"';
         } else {
             query = 'SELECT * FROM caterer WHERE zip=' + item;
         }
@@ -116,36 +119,66 @@ module.exports = (function() {
         });
     });
 
-    var caterer_occasion_breakfast= api.route('/caterer/occasion/breakfast');
+    var cousinePrice = api.route('/caterer/cuisine/price');
 
-    caterer_occasion_breakfast.get(function(request, response) {
+    cousinePrice.get(function(request, response) {
 
         pool.getConnection(function(err, connection) {
-            connection.query('SELECT cuisine_name, price FROM cuisine WHERE cuisine_occasion="'+ request.query.item + '"', function(err, rows) {
+            connection.query('SELECT cuisine.cuisine_name, price.item_price FROM cuisine INNER JOIN price ON cuisine.cuisine_id=price.cuisine_id_fk', function(err, rows) {
 
                 if (err) {
                     console.log(err);
                     if (err) return err;
                 }
-                console.log('Breakfast List: ', rows);
+                console.log('Cuisine List: ', rows);
                 connection.release();
                 response.send(rows);
             });
         });
     });
 
-    var caterer_type = api.route('/caterer/caterer_type');
+    /**** getting the cuisine list of according to cuisine serving time  ****/
+    var menuByTime = api.route('/caterer/menuByTime/:servingTime/:catererId');
 
-    caterer_type.get(function(req, res) {
 
+    menuByTime.get(function(req, res) {
+
+        var servingTime = req.param('servingTime');
+        var catererId = req.param('catererId');
+        var queryString = 'SELECT caterer.caterer_name, cuisine.cuisine_name, price.item_price FROM cuisine, price ,caterer WHERE cuisine.cuisine_id=price.cuisine_id_fk AND caterer.caterer_id=price.caterer_id_fk AND caterer.caterer_id =' + catererId + ' AND (cuisine_serving_time LIKE "' + servingTime + '%" or cuisine_serving_time LIKE "%' + servingTime + '")';
+        console.log('queryString- ', queryString);
         pool.getConnection(function(err, connection) {
-            connection.query('SELECT * FROM caterer WHERE caterer_type="Italian"', function(err, rows) {
+            connection.query(queryString, function(err, rows) {
 
                 if (err) {
                     console.log(err);
                     if (err) return err;
                 }
-                console.log('Caterer List: ', rows);
+                console.log('Cuisine List: ', rows);
+                connection.release();
+                res.send(rows);
+            });
+        });
+    });
+
+    /**** getting the cuisine list of according to cuisine serving time  ****/
+    var menuByCategory = api.route('/caterer/menuByCategory/:category/:catererId');
+
+
+    menuByCategory.get(function(req, res) {
+
+        var category = req.param('category');
+        var catererId = req.param('catererId');
+        var queryString = 'SELECT caterer.caterer_name, cuisine.cuisine_name, price.item_price FROM cuisine, price ,caterer WHERE cuisine.cuisine_id=price.cuisine_id_fk AND caterer.caterer_id=price.caterer_id_fk AND caterer.caterer_id ='+ catererId +' AND cuisine_category LIKE "'+category+'%"';
+        console.log('queryString- ', queryString);
+        pool.getConnection(function(err, connection) {
+            connection.query(queryString, function(err, rows) {
+
+                if (err) {
+                    console.log(err);
+                    if (err) return err;
+                }
+                console.log('Cuisine List: ', rows);
                 connection.release();
                 res.send(rows);
             });

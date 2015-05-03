@@ -13,7 +13,7 @@
           <div class="row city-list">
             <ul class="city-card-cities">
               {{#each this.areas}}
-              <li><a href="city/{{../this.cityName}}/area/{{this}}">{{this}}</a></li>
+              <li><a href="#" class="area-link" data-city="{{../this.cityName}}" data-area="{{this}}">{{this}}</a></li>
               {{/each}}
             </ul>
           </div>
