@@ -6,7 +6,7 @@ var loggedInUserTemplate = require('../templates/loggedInUser.hbs');
 var searchResultTemplate = require('../templates/searchResult.hbs');
 var menuTemplate = require('../templates/menu.hbs');
 var cityListTemplate = require('../templates/cityList.hbs');
-
+var CookieUtil = require('./cookieutil.js');
 var cityList = require('../data/citylist.json');
 
 var HeaderView = function() {
@@ -52,7 +52,6 @@ var HeaderView = function() {
             }
         });
     });
-
 
     $('.dropdown-menu').find('.form-div').click(function(event) {
         event.stopPropagation();
@@ -177,19 +176,21 @@ var HeaderView = function() {
             var self = this;
             var catererId = $(event.target).attr('data-caterer-id');
             var servingTime = $(this).find('option:selected').val();
+            var catererName = $(event.target).attr('data-caterer-name');
             var url = '/api/caterer/menuByTime/' + servingTime + '/' + catererId;
             console.log("menuByTime url- ", url);
-            fetchMenuList(url);
+            fetchMenuList(url, catererName);
         });
         $(".menu-dpd").change(function(event) {
 
             var catererId = $(event.target).attr('data-caterer-id');
             var category = $(this).find('option:selected').val();
+            var catererName = $(event.target).attr('data-caterer-name');
             var url = '/api/caterer/menuByCategory/' + category + '/' + catererId;
-            fetchMenuList(url);
+            fetchMenuList(url, catererName);
         });
 
-        var fetchMenuList = function(url) {
+        var fetchMenuList = function(url, catererName) {
 
             $.ajax({
                 url: url,
@@ -197,8 +198,15 @@ var HeaderView = function() {
                 success: function(menuResponse, textStatus, jqXHR) {
                     console.log('Cuisine LIST- ', menuResponse);
                     $('#main').html(menuTemplate({
-                        "menuArray": menuResponse
+                        "menuArray": menuResponse,
+                        "catererName": catererName
                     }));
+                    $('.add-to-cart-btn').click(function(event){
+                        var catererId = $(event.target).attr('data-caterer-id');
+                        var CuisineId = $(event.target).attr('data-cuisine-id');
+                        var CuisinePrice = $(event.target).attr('data-cuisine-price');
+                        var quantity = $(event.target).closest('.cuisine-item').find('.item-quantity').val();
+                    });
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.log(' failed- ', errorThrown);

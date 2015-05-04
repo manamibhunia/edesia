@@ -98,36 +98,20 @@
     width: 100%;
     margin-bottom: 5px;
 }
-/*
-#main .city-card .city-card-panel.cities-panel .city-card-cities li{
 
-	display: inline-block;
-    width: 100%;
+#main #occasionResultDetails .panel-body{
+
+    max-height: 600px;
+    overflow: scroll;
 }
 
-#main .city-card .city-card-panel.cities-panel .city-card-cities.first {
+#main #occasionResultDetails .menu-details{
 
-	padding: 30px 0 30px 25px;
+    margin-bottom: 20px;
 }
+#main #occasionResultDetails .menu-details .menu-desc{
 
-
-#main .city-card .thumbnail {
-    margin: 0 auto;
-    text-align: center;
+    height: 130px;
+    max-height: 130px;
+    overflow: scroll;
 }
-
-#main .city-div .thumbnail img {
-    width: 500px;
-    height: 300px;
-}
-
-#main .city-div .wrapper .post-content {
-    background: none repeat scroll 0 0 #F7ECEC;
-    opacity: 0.5;
-    margin: 0 auto;
-    text-align: center;
-    position: relative;
-    width: 100%;
-}
-
-*/

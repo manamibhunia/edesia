@@ -5,12 +5,12 @@
               <div class="panel-heading">
                 <h3 class="panel-title">
                     {{this.caterer_name}}
-                    <i class="fa fa-times fa-lg pointer pull-right"></i>
+                    <i class=" fa-lg pointer pull-right"></i>
                 </h3>
               </div>
               <div class="panel-body">
                 <ul>
-                    <li>Type: {{this.caterer_type}}</li>
+                    <li>Type: {{this.cuisine_type}}</li>
                     <li>Address: {{this.address1}}, {{this.address2}}</li>
                     <li>City: {{this.city}}</li>
                     <li>Zip: {{this.zip}}</li>
@@ -19,7 +19,7 @@
                 </ul>
                 <div class="btn-group">
                   <label>Search items by time: </label>
-                  <select type="button" class="btn btn-default occasion-dpd" data-caterer-id="{{this.caterer_id}}">
+                  <select type="button" class="btn btn-default occasion-dpd" data-caterer-id="{{this.caterer_id}}" data-caterer-name="{{this.caterer_name}}">
                       <option value ="null">Select</option>
                       <option value ="breakfast">Breakfast</option>
                       <option value="lunch">Lunch</option>
@@ -28,7 +28,7 @@
                 </div>
                 <div class="btn-group">
                   <label>Search items by type: </label>
-                  <select type="button" class="btn btn-default menu-dpd" data-caterer-id="{{this.caterer_id}}">
+                  <select type="button" class="btn btn-default menu-dpd" data-caterer-id="{{this.caterer_id}}" data-caterer-name="{{this.caterer_name}}">
                       <option value ="null">Menu</option>
                       <option value ="appetizer">Appetizer</option>
                       <option value="salad">Salad </option>

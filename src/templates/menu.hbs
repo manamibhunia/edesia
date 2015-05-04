@@ -1,22 +1,43 @@
 <div id="occasionResultDetails">
-    {{# each menuArray}}
-    <div class="col-md-6">
+    <div class="col-md-12">
         <div class="panel panel-default">
           <div class="panel-heading">
             <h3 class="panel-title">
-                {{this.caterer_name}}
-                <i class="fa fa-times fa-lg pointer pull-right"></i>
+                {{catererName}}  ==> lunch menu
+                <button class="btn btn-xs btn-primary pull-right" type = "button">
+                  <i class="fa fa-check-circle"></i>  Checkout  </button>
             </h3>
           </div>
           <div class="panel-body">
-            <ul>
-                
-                <li>Cuine Name: {{this.cuisine_name}}</li>
-                <li>Price: {{this.item_price}}</li>
-                
-            </ul>
+            <div class="container">
+              {{#each menuArray}}
+              <div class="row menu-details">
+                <div class="media">
+                  <a href="#" class="pull-left">
+                      <img src="images/items/{{this.image}}" style="height: 200px; width: 200px;" class="media-object" alt="Menu Image">
+                  </a>
+                  <div class="media-body">
+                      <h4 class="media-heading">{{this.cuisine_name}} 
+                        <small><i class="pull-right"> ${{this.item_price}} </i></small>
+                      </h4>
+                      <div class="menu-desc">
+                        Excellent feature! I love it. One day I'm definitely going to put this Bootstrap component into use and I'll let you know once I do.
+                      </div>
+                      <form class="form-inline pull-right">
+                        <div class="form-group">
+                          <label for="quantity-{{@index}}" class="sr-only">Quantity: </label>
+                          <input type="text" class="form-control" id="quantity-{{@index}}" placeholder="Quantity">
+                        </div>
+                        <button class ="btn btn-default" type= "button">
+                          <i class="fa fa-lg fa-cart-plus"></i>
+                        </button>
+                      </form>
+                  </div>
+                </div>
+              </div>
+              {{/each}}
+            </div>
           </div>
         </div>
     </div>
-    {{/each}}
 </div>

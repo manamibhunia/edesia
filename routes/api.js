@@ -145,7 +145,7 @@ module.exports = (function() {
 
         var servingTime = req.param('servingTime');
         var catererId = req.param('catererId');
-        var queryString = 'SELECT caterer.caterer_name, cuisine.cuisine_name, price.item_price FROM cuisine, price ,caterer WHERE cuisine.cuisine_id=price.cuisine_id_fk AND caterer.caterer_id=price.caterer_id_fk AND caterer.caterer_id =' + catererId + ' AND (cuisine_serving_time LIKE "' + servingTime + '%" or cuisine_serving_time LIKE "%' + servingTime + '")';
+        var queryString = 'SELECT caterer.caterer_name, cuisine.cuisine_name, cuisine.image, price.item_price FROM cuisine, price ,caterer WHERE cuisine.cuisine_id=price.cuisine_id_fk AND caterer.caterer_id=price.caterer_id_fk AND caterer.caterer_id =' + catererId + ' AND (cuisine_serving_time LIKE "' + servingTime + '%" or cuisine_serving_time LIKE "%' + servingTime + '" OR cuisine_serving_time LIKE "%'+servingTime+'%")';
         console.log('queryString- ', queryString);
         pool.getConnection(function(err, connection) {
             connection.query(queryString, function(err, rows) {
@@ -270,6 +270,25 @@ module.exports = (function() {
                 connection.release();
                 res.send({
                     message: 'Order Added'
+                });
+            });
+        });
+    });
+
+    var price = api.route('/price');
+    price.post(function(req, res) {
+
+        console.log('Data: ', req.body);
+
+        pool.getConnection(function(err, connection) {
+            connection.query('INSERT INTO price SET ?', req.body, function(err, rows) {
+                if (err) {
+                    console.log(err);
+                    if (err) return err;
+                }
+                connection.release();
+                res.send({
+                    message: 'price Added'
                 });
             });
         });
