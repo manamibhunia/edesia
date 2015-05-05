@@ -9,7 +9,8 @@ var loggedInUserTemplate = require('../templates/loggedInUser.hbs');
 var searchResultTemplate = require('../templates/searchResult.hbs');
 var menuTemplate = require('../templates/menu.hbs');
 var cityListTemplate = require('../templates/cityList.hbs');
-var shoppingCartTemplate = require('../templates/shoppingcart.hbs')
+var shoppingCartTemplate = require('../templates/shoppingcart.hbs');
+var paymentTemplate = require('../templates/payment.hbs');
 var CookieUtil = require('../js/cookieutil.js');
 var cityList = require('../data/citylist.json');
 
@@ -153,6 +154,60 @@ var HeaderView = function() {
 
     });
 
+    var finalizeCheckout = function() {
+
+        var userObject = null;
+        if (sessionStorage.getItem("user")) {
+            userObject = JSON.parse(sessionStorage.getItem("user"));
+            
+        }
+        console.log('user details- ',userObject);
+
+        var cartObject = null;
+        if (localStorage.getItem("cart")) {
+            cartObject = JSON.parse(localStorage.getItem("cart"));
+
+         }
+        console.log('cart details- ',cartObject);
+            
+        $('#main').html(paymentTemplate(userObject));
+        $('#delivery-date').datetimepicker({
+            format: 'YYYY-MM-DD HH:mm:ss'
+        });
+
+
+        $('#btn-payment').click(function(event){
+
+            event.preventDefault();
+            var requestJson = {
+                customer_id_fk: userObject.customer_id,
+                caterer_id_fk: cartObject.catererId,
+                order_date: moment().format('YYYY-MM-DD HH:mm:ss'),
+                delivery_date: $('#delv-dt').val(),
+                order_status: 'pending',
+                total_price: cartObject.cartTotal,
+                payment_status: 'paid',
+                note: $('#note').val()
+            };
+            console.log('order details- ',requestJson);
+            $.ajax({
+                url: '/api/order',
+                type: 'POST',
+                data: requestJson,
+                success: function(response, textStatus, jqXHR) {
+                    
+                    $('#delivery-date-msg').html($('#delv-dt').val());
+                    $('#orderModal').modal('toggle');
+                    localStorage.removeItem("cart");
+                    $('.item-no-in-cart').html(0);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log('Search failed- ', errorThrown);
+                }
+            });
+        });
+    };
+
     var checkout = function() {
 
         var cartObject = null;
@@ -164,8 +219,10 @@ var HeaderView = function() {
             fetchMenuList(menuUrl, catererNameForMenu);
         });
 
-        $('#datetimepicker1').datetimepicker();
-        
+        $('.finalize-checkout').click(function(){
+            finalizeCheckout();
+        });
+
         console.log("btn-checkout");
         $('.btn-delete-item-from-cart').click(function(event){
             
@@ -277,39 +334,65 @@ var HeaderView = function() {
             catererNameForMenu = catererName;
             fetchMenuList(url, catererName);
         });
+    };
 
-        var fetchMenuList = function(url, catererName, catererId) {
+    var fetchMenuList = function(url, catererName, catererId) {
 
-            $.ajax({
-                url: url,
-                type: 'GET',
-                success: function(menuResponse, textStatus, jqXHR) {
-                    console.log('Cuisine LIST- ', menuResponse);
-                    $('#main').html(menuTemplate({
-                        "menuArray": menuResponse,
-                        "catererName": catererName
-                    }));
-                    $('.btn-add-to-cart').click(function(event){
-                        
-                        event.preventDefault();
-                        var btn = $(event.target).closest('form').find('button');
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(menuResponse, textStatus, jqXHR) {
+                console.log('Cuisine LIST- ', menuResponse);
+                $('#main').html(menuTemplate({
+                    "menuArray": menuResponse,
+                    "catererName": catererName
+                }));
+                $('.btn-add-to-cart').click(function(event){
+                    
+                    event.preventDefault();
+                    var btn = $(event.target).closest('form').find('button');
 
-                        var catererId = $(btn).attr('data-catarer-id');
-                        var catererName = $(btn).attr('data-catarer-name'); 
-                        var cuisineId = $(btn).attr('data-cuisine-id');
-                        var cuisineName = $(btn).attr('data-cuisine-name');
-                        var cuisinePrice = $(btn).attr('data-item-price');
-                        var cuisineImage = $(btn).attr('data-cuisine-image');
-                        var quantity = $(btn).closest('form').find('.item-quantity').val();
+                    var catererId = $(btn).attr('data-catarer-id');
+                    var catererName = $(btn).attr('data-catarer-name'); 
+                    var cuisineId = $(btn).attr('data-cuisine-id');
+                    var cuisineName = $(btn).attr('data-cuisine-name');
+                    var cuisinePrice = $(btn).attr('data-item-price');
+                    var cuisineImage = $(btn).attr('data-cuisine-image');
+                    var quantity = $(btn).closest('form').find('.item-quantity').val();
 
-                        var cartObject = null;
-                        if (localStorage.getItem("cart")) {
-                            cartObject = JSON.parse(localStorage.getItem("cart"));
-                        }
-                        if(cartObject !== null) {
-                            if(cartObject.cartItems) {
-                                if(cartObject.cartItems.length < 1) {
-                                    cartObject.cartItems = [];
+                    var cartObject = null;
+                    if (localStorage.getItem("cart")) {
+                        cartObject = JSON.parse(localStorage.getItem("cart"));
+                    }
+                    if(cartObject !== null) {
+                        if(cartObject.cartItems) {
+                            if(cartObject.cartItems.length < 1) {
+                                cartObject.cartItems = [];
+                                cartObject.cartItems.push({
+                                    "cuisineName": cuisineName, 
+                                    "cuisineId": cuisineId,
+                                    "cuisinePrice": cuisinePrice, 
+                                    "cuisineImage": cuisineImage,
+                                    "itemTotal": (cuisinePrice*quantity),
+                                    "quantity": quantity
+                                });
+                                cartObject.catererId = catererId;
+                            } else {
+
+                                var duplicate = false;
+
+                                for(var i =0;i< cartObject.cartItems.length; i++) {
+
+                                    if(cartObject.cartItems[i].cuisineName == cuisineName) {
+                                        duplicate = true;
+                                        cartObject.cartItems[i].quantity = (parseInt(cartObject.cartItems[i].quantity) + parseInt(quantity));
+                                        cartObject.cartItems[i].itemTotal = (parseInt(cartObject.cartItems[i].quantity) * parseInt(cartObject.cartItems[i].cuisinePrice));
+                                        
+                                        break;
+                                    }
+                                }
+                                if(duplicate == false) {
+
                                     cartObject.cartItems.push({
                                         "cuisineName": cuisineName, 
                                         "cuisineId": cuisineId, 
@@ -318,49 +401,11 @@ var HeaderView = function() {
                                         "itemTotal": (cuisinePrice*quantity),
                                         "quantity": quantity
                                     });
-                                } else {
-
-                                    var duplicate = false;
-
-                                    for(var i =0;i< cartObject.cartItems.length; i++) {
-
-                                        if(cartObject.cartItems[i].cuisineName == cuisineName) {
-                                            duplicate = true;
-                                            cartObject.cartItems[i].quantity = (parseInt(cartObject.cartItems[i].quantity) + parseInt(quantity));
-                                            cartObject.cartItems[i].itemTotal = (parseInt(cartObject.cartItems[i].quantity) * parseInt(cartObject.cartItems[i].cuisinePrice));
-                                            
-                                            break;
-                                        }
-                                    }
-                                    if(duplicate == false) {
-
-                                        cartObject.cartItems.push({
-                                            "cuisineName": cuisineName, 
-                                            "cuisineId": cuisineId, 
-                                            "cuisinePrice": cuisinePrice, 
-                                            "cuisineImage": cuisineImage,
-                                            "itemTotal": (cuisinePrice*quantity),
-                                            "quantity": quantity
-                                        });
-                                    }
                                 }
-                            } else {
-                                cartObject.cartItems = [];
-                                cartObject.cartItems.push({
-                                    "cuisineName": cuisineName, 
-                                    "cuisineId": cuisineId, 
-                                    "cuisinePrice": cuisinePrice, 
-                                    "cuisineImage": cuisineImage,
-                                    "itemTotal": (cuisinePrice*quantity),
-                                    "quantity": quantity
-                                });
-                                cartObject.cartTotal = (cuisinePrice*quantity);
+                                cartObject.catererId = catererId;
                             }
                         } else {
-                            cartObject = {
-                                cartItems: [],
-                                cartTotal: (cuisinePrice*quantity)
-                            };
+                            cartObject.cartItems = [];
                             cartObject.cartItems.push({
                                 "cuisineName": cuisineName, 
                                 "cuisineId": cuisineId, 
@@ -369,37 +414,53 @@ var HeaderView = function() {
                                 "itemTotal": (cuisinePrice*quantity),
                                 "quantity": quantity
                             });
+                            cartObject.cartTotal = (cuisinePrice*quantity);
+                            cartObject.catererId = catererId;
                         }
-                        cartObject.cartTotal = 0;
-                        for(var i =0;i< cartObject.cartItems.length; i++) {
+                    } else {
+                        cartObject = {
+                            cartItems: [],
+                            cartTotal: (cuisinePrice*quantity),
+                            catererId: catererId
+                        };
+                        cartObject.cartItems.push({
+                            "cuisineName": cuisineName, 
+                            "cuisineId": cuisineId, 
+                            "cuisinePrice": cuisinePrice, 
+                            "cuisineImage": cuisineImage,
+                            "itemTotal": (cuisinePrice*quantity),
+                            "quantity": quantity
+                        });
+                    }
+                    cartObject.cartTotal = 0;
+                    for(var i =0;i< cartObject.cartItems.length; i++) {
 
-                            cartObject.cartTotal += cartObject.cartItems[i].itemTotal;
-                        }
-                        $('.item-no-in-cart').html(cartObject.cartItems.length);
-                        localStorage.setItem("cart", JSON.stringify(cartObject));
-                    });
+                        cartObject.cartTotal += cartObject.cartItems[i].itemTotal;
+                    }
+                    $('.item-no-in-cart').html(cartObject.cartItems.length);
+                    localStorage.setItem("cart", JSON.stringify(cartObject));
+                });
 
-                    $('.back-to-search a').click(function(event){
-                        
-                        event.preventDefault();
+                $('.back-to-search a').click(function(event){
+                    
+                    event.preventDefault();
 
-                        if(searchAction === "search") {
-                            search(searchKey);
-                        } else {
-                            searchByArea(searchCity, searchArea);
-                        }
-                    });
+                    if(searchAction === "search") {
+                        search(searchKey);
+                    } else {
+                        searchByArea(searchCity, searchArea);
+                    }
+                });
 
-                    $('#btn-checkout').click(function(event) {
+                $('#btn-checkout').click(function(event) {
 
-                        checkout();
-                    });
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    console.log(' failed- ', errorThrown);
-                }
-            });
-        };
+                    checkout();
+                });
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(' failed- ', errorThrown);
+            }
+        });
     };
 };
 

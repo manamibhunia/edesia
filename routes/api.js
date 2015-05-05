@@ -40,6 +40,7 @@ module.exports = (function() {
                     if (userObj.password === request.query.password) {
                         console.log('email correct & password correct');
                         delete userObj.password;
+                        delete userObj.security_answer;
                         response.send(userObj);
                     } else {
                         console.log('email correct & password incorrect');
@@ -240,9 +241,9 @@ module.exports = (function() {
         });
     });
 
-    var order_details = api.route('/order_details');
+    var order = api.route('/order');
 
-    order_details.get(function(req, res) {
+    order.get(function(req, res) {
 
         pool.getConnection(function(err, connection) {
             connection.query('SELECT * FROM order_details WHERE orderid', function(err, rows) {
@@ -258,7 +259,7 @@ module.exports = (function() {
         });
     });
 
-    order_details.post(function(req, res) {
+    order.post(function(req, res) {
 
         console.log('Data: ', req.body);
 
