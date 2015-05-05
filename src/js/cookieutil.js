@@ -8,9 +8,6 @@ var CookieUtil = function() {
             var expires = "; expires=" + date.toGMTString();
         } else var expires = "";
 
-        var fixedName = '<%= Request["formName"] %>';
-        name = fixedName + name;
-
         document.cookie = name + "=" + value + expires + "; path=/";
     };
 
@@ -26,7 +23,7 @@ var CookieUtil = function() {
         return null;
     };
     
-    var eraseCookie = function() {
+    var eraseCookie = function(name) {
         createCookie(name, "", -1);
     };
 };

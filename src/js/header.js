@@ -1,20 +1,36 @@
 var $ = jQuery = require('jquery');
 var bootstrap = require('bootstrap');
+var moment = require('moment');
+var datetimepicker = require('./bootstrap-datetimepicker');
+
 var headerMainTemplate = require('../templates/headerNavTmpl.hbs');
 var guestUserTemplate = require('../templates/guestUser.hbs');
 var loggedInUserTemplate = require('../templates/loggedInUser.hbs');
 var searchResultTemplate = require('../templates/searchResult.hbs');
 var menuTemplate = require('../templates/menu.hbs');
 var cityListTemplate = require('../templates/cityList.hbs');
-var CookieUtil = require('./cookieutil.js');
+var shoppingCartTemplate = require('../templates/shoppingcart.hbs')
+var CookieUtil = require('../js/cookieutil.js');
 var cityList = require('../data/citylist.json');
 
 var HeaderView = function() {
+
+    var searchKey = "";
+    var searchAction = "";
+    var searchCity = "";
+    var searchArea = "";
+    var menuUrl = "";
+    var catererNameForMenu = "";
 
     $('header').html(headerMainTemplate());
 
     if (localStorage.getItem("user")) {
         sessionStorage.setItem("user", JSON.stringify(userObj));
+    }
+
+    if (localStorage.getItem("cart")) {
+        var cart = JSON.parse(localStorage.getItem("cart"));
+        $('.item-no-in-cart').html(cart.cartItems.length);
     }
 
     if (sessionStorage.getItem("user")) {
@@ -35,6 +51,15 @@ var HeaderView = function() {
         event.preventDefault();
         var city = $(event.target).attr('data-city');
         var area = $(event.target).attr('data-area');
+
+        searchAction = "searchByArea";
+        searchCity = city;
+        searchArea = area;
+        searchByArea(city, area);
+    });
+
+    var searchByArea = function(city, area) {
+
         var url = '/api/city/' + city + '/area/' + area;
         $.ajax({
             url: url,
@@ -51,7 +76,7 @@ var HeaderView = function() {
                 console.log('Search failed- ', errorThrown);
             }
         });
-    });
+    };
 
     $('.dropdown-menu').find('.form-div').click(function(event) {
         event.stopPropagation();
@@ -128,6 +153,58 @@ var HeaderView = function() {
 
     });
 
+    var checkout = function() {
+
+        var cartObject = null;
+        if (localStorage.getItem("cart")) {
+            cartObject = JSON.parse(localStorage.getItem("cart"));
+        }
+        $('#main').html(shoppingCartTemplate(cartObject));
+        $('.continue-shopping').click(function(){
+            fetchMenuList(menuUrl, catererNameForMenu);
+        });
+
+        $('#datetimepicker1').datetimepicker();
+        
+        console.log("btn-checkout");
+        $('.btn-delete-item-from-cart').click(function(event){
+            
+            var btn = $(event.target).closest('.actions').find('button.btn-delete-item-from-cart');
+            var cuisineName = $(btn).attr('data-cuisine-name');
+            var cuisineId = $(btn).attr('data-cuisine-id');
+            console.log("inside delete btn- ",btn);
+            console.log("inside delete- ",cuisineName);
+            debugger;
+            var cartObject = null;
+            if (localStorage.getItem("cart")) {
+                cartObject = JSON.parse(localStorage.getItem("cart"));
+            }
+
+            for(var i =0;i< cartObject.cartItems.length; i++) {
+
+                if(cartObject.cartItems[i].cuisineName == cuisineName) {
+
+                    cartObject.cartItems.splice(i, 1);
+                    break;
+                }
+            }
+
+            cartObject.cartTotal = 0;
+            for(var i =0;i< cartObject.cartItems.length; i++) {
+
+                cartObject.cartTotal += cartObject.cartItems[i].itemTotal;
+            }
+            $('.item-no-in-cart').html(cartObject.cartItems.length);
+            localStorage.setItem("cart", JSON.stringify(cartObject));
+            checkout();
+        });
+    };
+
+    $('#shopping-cart-icon').click(function(event) {
+
+        checkout();
+    });
+
     $('.logout-btn').click(function(event) {
 
         if (localStorage.getItem("user")) {
@@ -143,9 +220,16 @@ var HeaderView = function() {
 
         var self = this;
         console.log('this- ',this);
+        searchKey = $('#search-item').val();
+        searchAction = "search";
+        search(searchKey);
+    });
+
+    var search = function(searchKey) {
+
         var requestJson = {
 
-            item: $('#search-item').val(),
+            item: searchKey,
         };
         $.ajax({
             url: '/api/caterer',
@@ -164,7 +248,7 @@ var HeaderView = function() {
                 console.log('Search failed- ', errorThrown);
             }
         });
-    });
+    };
 
     var showSearchResult = function(searchResult) {
 
@@ -179,6 +263,8 @@ var HeaderView = function() {
             var catererName = $(event.target).attr('data-caterer-name');
             var url = '/api/caterer/menuByTime/' + servingTime + '/' + catererId;
             console.log("menuByTime url- ", url);
+            menuUrl = url;
+            catererNameForMenu = catererName;
             fetchMenuList(url, catererName);
         });
         $(".menu-dpd").change(function(event) {
@@ -187,10 +273,12 @@ var HeaderView = function() {
             var category = $(this).find('option:selected').val();
             var catererName = $(event.target).attr('data-caterer-name');
             var url = '/api/caterer/menuByCategory/' + category + '/' + catererId;
+            menuUrl = url;
+            catererNameForMenu = catererName;
             fetchMenuList(url, catererName);
         });
 
-        var fetchMenuList = function(url, catererName) {
+        var fetchMenuList = function(url, catererName, catererId) {
 
             $.ajax({
                 url: url,
@@ -201,11 +289,110 @@ var HeaderView = function() {
                         "menuArray": menuResponse,
                         "catererName": catererName
                     }));
-                    $('.add-to-cart-btn').click(function(event){
-                        var catererId = $(event.target).attr('data-caterer-id');
-                        var CuisineId = $(event.target).attr('data-cuisine-id');
-                        var CuisinePrice = $(event.target).attr('data-cuisine-price');
-                        var quantity = $(event.target).closest('.cuisine-item').find('.item-quantity').val();
+                    $('.btn-add-to-cart').click(function(event){
+                        
+                        event.preventDefault();
+                        var btn = $(event.target).closest('form').find('button');
+
+                        var catererId = $(btn).attr('data-catarer-id');
+                        var catererName = $(btn).attr('data-catarer-name'); 
+                        var cuisineId = $(btn).attr('data-cuisine-id');
+                        var cuisineName = $(btn).attr('data-cuisine-name');
+                        var cuisinePrice = $(btn).attr('data-item-price');
+                        var cuisineImage = $(btn).attr('data-cuisine-image');
+                        var quantity = $(btn).closest('form').find('.item-quantity').val();
+
+                        var cartObject = null;
+                        if (localStorage.getItem("cart")) {
+                            cartObject = JSON.parse(localStorage.getItem("cart"));
+                        }
+                        if(cartObject !== null) {
+                            if(cartObject.cartItems) {
+                                if(cartObject.cartItems.length < 1) {
+                                    cartObject.cartItems = [];
+                                    cartObject.cartItems.push({
+                                        "cuisineName": cuisineName, 
+                                        "cuisineId": cuisineId, 
+                                        "cuisinePrice": cuisinePrice, 
+                                        "cuisineImage": cuisineImage,
+                                        "itemTotal": (cuisinePrice*quantity),
+                                        "quantity": quantity
+                                    });
+                                } else {
+
+                                    var duplicate = false;
+
+                                    for(var i =0;i< cartObject.cartItems.length; i++) {
+
+                                        if(cartObject.cartItems[i].cuisineName == cuisineName) {
+                                            duplicate = true;
+                                            cartObject.cartItems[i].quantity = (parseInt(cartObject.cartItems[i].quantity) + parseInt(quantity));
+                                            cartObject.cartItems[i].itemTotal = (parseInt(cartObject.cartItems[i].quantity) * parseInt(cartObject.cartItems[i].cuisinePrice));
+                                            
+                                            break;
+                                        }
+                                    }
+                                    if(duplicate == false) {
+
+                                        cartObject.cartItems.push({
+                                            "cuisineName": cuisineName, 
+                                            "cuisineId": cuisineId, 
+                                            "cuisinePrice": cuisinePrice, 
+                                            "cuisineImage": cuisineImage,
+                                            "itemTotal": (cuisinePrice*quantity),
+                                            "quantity": quantity
+                                        });
+                                    }
+                                }
+                            } else {
+                                cartObject.cartItems = [];
+                                cartObject.cartItems.push({
+                                    "cuisineName": cuisineName, 
+                                    "cuisineId": cuisineId, 
+                                    "cuisinePrice": cuisinePrice, 
+                                    "cuisineImage": cuisineImage,
+                                    "itemTotal": (cuisinePrice*quantity),
+                                    "quantity": quantity
+                                });
+                                cartObject.cartTotal = (cuisinePrice*quantity);
+                            }
+                        } else {
+                            cartObject = {
+                                cartItems: [],
+                                cartTotal: (cuisinePrice*quantity)
+                            };
+                            cartObject.cartItems.push({
+                                "cuisineName": cuisineName, 
+                                "cuisineId": cuisineId, 
+                                "cuisinePrice": cuisinePrice, 
+                                "cuisineImage": cuisineImage,
+                                "itemTotal": (cuisinePrice*quantity),
+                                "quantity": quantity
+                            });
+                        }
+                        cartObject.cartTotal = 0;
+                        for(var i =0;i< cartObject.cartItems.length; i++) {
+
+                            cartObject.cartTotal += cartObject.cartItems[i].itemTotal;
+                        }
+                        $('.item-no-in-cart').html(cartObject.cartItems.length);
+                        localStorage.setItem("cart", JSON.stringify(cartObject));
+                    });
+
+                    $('.back-to-search a').click(function(event){
+                        
+                        event.preventDefault();
+
+                        if(searchAction === "search") {
+                            search(searchKey);
+                        } else {
+                            searchByArea(searchCity, searchArea);
+                        }
+                    });
+
+                    $('#btn-checkout').click(function(event) {
+
+                        checkout();
                     });
                 },
                 error: function(jqXHR, textStatus, errorThrown) {

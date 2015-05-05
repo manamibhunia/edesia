@@ -83,13 +83,14 @@ gulp.task('copy-html', function() {
 });
 
 gulp.task('copy-images', function() {
-    gulp.src('src/images/*')
+    gulp.src('src/images/**/*.*')
         .pipe(gulp.dest('dist/images/'));
 });
 
 gulp.task('copy-css', function() {
     gulp.src(['node_modules/bootstrap/dist/css/bootstrap.min.css', 
-        'node_modules/font-awesome/css/font-awesome.min.css'])
+        'node_modules/font-awesome/css/font-awesome.min.css', 
+        'src/styles/bootstrap-datetimepicker.min.css'])
         .pipe(gulp.dest('dist/styles/'));
 });
 

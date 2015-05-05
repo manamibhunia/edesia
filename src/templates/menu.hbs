@@ -1,10 +1,13 @@
+<span class="back-to-search">
+  <a href="#"><== Back to Search Results</a>
+</span>
 <div id="occasionResultDetails">
     <div class="col-md-12">
         <div class="panel panel-default">
           <div class="panel-heading">
             <h3 class="panel-title">
-                {{catererName}}  ==> lunch menu
-                <button class="btn btn-xs btn-primary pull-right" type = "button">
+                {{catererName}}     lunch menu
+                <button class="btn btn-xs btn-primary pull-right" id="btn-checkout" type = "button">
                   <i class="fa fa-check-circle"></i>  Checkout  </button>
             </h3>
           </div>
@@ -26,9 +29,15 @@
                       <form class="form-inline pull-right">
                         <div class="form-group">
                           <label for="quantity-{{@index}}" class="sr-only">Quantity: </label>
-                          <input type="text" class="form-control" id="quantity-{{@index}}" placeholder="Quantity">
+                          <input type="text" class="form-control item-quantity" placeholder="Quantity">
                         </div>
-                        <button class ="btn btn-default" type= "button">
+                        <button class ="btn btn-default btn-add-to-cart" 
+                          data-catarer-name="{{../catererName}}"
+                          data-catarer-id="{{this.caterer_id}}"
+                          data-cuisine-name="{{this.cuisine_name}}"
+                          data-cuisine-id="{{this.cuisine_id}}"
+                          data-cuisine-image="{{this.image}}"
+                          data-item-price="{{this.item_price}}">
                           <i class="fa fa-lg fa-cart-plus"></i>
                         </button>
                       </form>
